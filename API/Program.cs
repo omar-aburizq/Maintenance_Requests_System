@@ -1,3 +1,10 @@
+using Application.Repositories;
+using Application.Services.RoleService;
+using Application.Services.UserService;
+using Infrastructuer.Context;
+using Infrastructuer.Data;
+using Infrastructuer.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -5,6 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -37,10 +46,16 @@ builder.Services.AddSwaggerGen(c =>
     c.AddSecurityRequirement(securityReq);
 });
 
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+builder.Services.AddScoped(typeof(IUserService), typeof(UserService)); 
+builder.Services.AddScoped(typeof(IRoleService), typeof(RoleService)); 
+
 var app = builder.Build();
 
-app.UseSwagger();
+UserSeedData.UserSeed(app.Services);
 
+app.UseSwagger();
 app.UseSwaggerUI();
 
 // Configure the HTTP request pipeline.
@@ -53,8 +68,3 @@ app.MapControllers();
 
 app.Run();
 
-
-//-------------------
-
-// Guid Not Auto Increment
-// Guid.NewGuid();

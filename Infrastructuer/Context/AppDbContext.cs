@@ -5,7 +5,7 @@ namespace Infrastructuer.Context
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        public AppDbContext(DbContextOptions options) : base(options)
         {
 
         }
@@ -21,6 +21,19 @@ namespace Infrastructuer.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+        
+            modelBuilder.Entity<Request>()
+                .HasOne(r => r.Emploeey)
+                .WithMany(u => u.CreatedRequests)
+                .HasForeignKey(r => r.EmploeeyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Request>()
+                .HasOne(r => r.Technician)
+                .WithMany(u => u.AssignedRequests)
+                .HasForeignKey(r => r.TechnicianId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             var relationShips = modelBuilder.Model
                 .GetEntityTypes().SelectMany(e => e.GetForeignKeys());
 
@@ -28,6 +41,7 @@ namespace Infrastructuer.Context
             {
                 relationship.DeleteBehavior = DeleteBehavior.Restrict;
             }
+
             base.OnModelCreating(modelBuilder);
         }
 
