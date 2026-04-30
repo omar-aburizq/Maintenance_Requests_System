@@ -1,0 +1,60 @@
+using Microsoft.OpenApi.Models;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+
+builder.Services.AddControllers();
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "IMS API",
+        Version = "v1"
+    });
+
+    var securityScheme = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Put **_ONLY_** your JWT Bearer token hera",
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = "Bearer"
+        }
+    };
+    c.AddSecurityDefinition("Bearer", securityScheme);
+
+    var securityReq = new OpenApiSecurityRequirement
+    {
+        {securityScheme, new string[] { } }
+    };
+    c.AddSecurityRequirement(securityReq);
+});
+
+var app = builder.Build();
+
+app.UseSwagger();
+
+app.UseSwaggerUI();
+
+// Configure the HTTP request pipeline.
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
+
+
+//-------------------
+
+// Guid Not Auto Increment
+// Guid.NewGuid();
