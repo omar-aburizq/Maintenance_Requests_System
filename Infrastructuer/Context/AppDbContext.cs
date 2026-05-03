@@ -42,6 +42,8 @@ namespace Infrastructuer.Context
                 relationship.DeleteBehavior = DeleteBehavior.Restrict;
             }
 
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly); // SeedData Confguration
+            
             base.OnModelCreating(modelBuilder);
         }
 

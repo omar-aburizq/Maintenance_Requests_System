@@ -7,7 +7,7 @@ namespace Domain.Entities
         public Guid Id { get; set; }
         public string Location { get; set; }
         public string EmployeeNotes { get; set; }
-        public string TechnicianNotes { get; set; }
+        public string? TechnicianNotes { get; set; } 
         public string? PhotoURL { get; set; }
 
         public Guid RequestId { get; set; }

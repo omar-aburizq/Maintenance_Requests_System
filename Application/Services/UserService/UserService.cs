@@ -16,10 +16,10 @@ namespace Application.Services.UserService
 
         public async Task CreateUser(CreateUserDto input)
         {
-            if (await _userRepository.GetAll().AnyAsync(x => x.Email == input.Email))
+            if (await _userRepository.GetAll().AnyAsync(x => x.Email.ToLower().Trim() == input.Email.ToLower().Trim()))
                 throw new Exception("Email Already Exist");
 
-            if (await _userRepository.GetAll().AnyAsync(x => x.PhoneNumber == input.PhoneNumber))
+            if (await _userRepository.GetAll().AnyAsync(x => x.PhoneNumber.Trim() == input.PhoneNumber.Trim()))
                 throw new Exception("PhoneNumber Already Exist");
 
             var data = new User
@@ -42,6 +42,10 @@ namespace Application.Services.UserService
         public async Task DeleteUser(Guid id)
         {
             var user = await _userRepository.GetByIdAsync(id);
+
+            if (user == null)
+                throw new Exception("User not found");
+
             _userRepository.Delete(user);
             await _userRepository.SaveChangesAsync();
 
@@ -50,7 +54,7 @@ namespace Application.Services.UserService
         public async Task<List<GetAllUsersDto>> GetAllUsers(string? name, string? email)
         {
             name = !String.IsNullOrEmpty(name) ? name.ToLower().Trim() : null;
-            email = !String.IsNullOrEmpty(email) ? email.ToLower().Trim() : null;
+            email = ! String.IsNullOrEmpty(email) ? email.ToLower().Trim() : null;
 
             var users = _userRepository.GetAll();
 
@@ -78,6 +82,10 @@ namespace Application.Services.UserService
         public async Task<GetUserDto> GetUserById(Guid id)
         {
             var user = _userRepository.GetAll().Include(x => x.Role).FirstOrDefault(x => x.Id == id);
+
+            if (user == null)
+                throw new Exception("User not found");
+
             var result = new GetUserDto
             {
                 Id = user.Id,
@@ -92,17 +100,20 @@ namespace Application.Services.UserService
 
         public async Task UpdateUser(Guid id, UpdateUserDto input)
         {
-            if (await _userRepository.GetAll().AnyAsync(x => x.Email == input.Email && x.Id != id))
+            if (await _userRepository.GetAll().AnyAsync(x => x.Email.ToLower().Trim() == input.Email.ToLower().Trim() && x.Id != id))
                 throw new Exception("Email Already Exist");
 
-            if (await _userRepository.GetAll().AnyAsync(x => x.PhoneNumber == input.PhoneNumber && x.Id != id))
+            if (await _userRepository.GetAll().AnyAsync(x => x.PhoneNumber.Trim() == input.PhoneNumber.Trim() && x.Id != id))
                 throw new Exception("PhoneNumber Already Exist");
 
             var user = await _userRepository.GetByIdAsync(id);
 
+            if (user == null)
+                throw new Exception("User not found");
+
             user.Name = input.Name;
-            user.Email = input.Email;
-            user.PhoneNumber = input.PhoneNumber;
+            user.Email = input.Email.ToLower().Trim();
+            user.PhoneNumber = input.PhoneNumber.Trim();
             user.Location = input.Location;
             user.RoleId = input.RoleId;
 
