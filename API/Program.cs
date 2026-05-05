@@ -2,7 +2,6 @@ using Application.Repositories;
 using Application.Services.CategoryService;
 using Application.Services.RequestService;
 using Application.Services.RoleService;
-using Application.Services.TechnicianService;
 using Application.Services.UserService;
 using Infrastructuer.Context;
 using Infrastructuer.Data;
@@ -51,10 +50,10 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
-builder.Services.AddScoped(typeof(IUserService), typeof(UserService)); 
-builder.Services.AddScoped(typeof(IRoleService), typeof(RoleService)); 
-builder.Services.AddScoped(typeof(ICategoryService), typeof(CategoryService)); 
-builder.Services.AddScoped(typeof(IRequestService), typeof(RequestService)); 
+builder.Services.AddScoped(typeof(IUserService), typeof(UserService));
+builder.Services.AddScoped(typeof(IRoleService), typeof(RoleService));
+builder.Services.AddScoped(typeof(ICategoryService), typeof(CategoryService));
+builder.Services.AddScoped(typeof(IRequestService), typeof(RequestService));
 
 var app = builder.Build();
 
