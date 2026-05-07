@@ -31,7 +31,7 @@ namespace Application.Services.UserService
                 Location = input.Location,
                 RoleId = input.RoleId,
             };
-            var PasswordHasher = new PasswordHasher<User>();  // Dawnlod Microsoft.Extensions.Identity.Core
+            var PasswordHasher = new PasswordHasher<User>();  // Install Microsoft.Extensions.Identity.Core
             data.Password = PasswordHasher.HashPassword(data, input.Password);
 
             await _userRepository.InsertAsync(data);
@@ -101,10 +101,10 @@ namespace Application.Services.UserService
         public async Task UpdateUser(Guid id, UpdateUserDto input)
         {
             if (await _userRepository.GetAll().AnyAsync(x => x.Email.ToLower().Trim() == input.Email.ToLower().Trim() && x.Id != id))
-                throw new Exception("Email Already Exist");
+                throw new Exception("email already exist");
 
             if (await _userRepository.GetAll().AnyAsync(x => x.PhoneNumber.Trim() == input.PhoneNumber.Trim() && x.Id != id))
-                throw new Exception("PhoneNumber Already Exist");
+                throw new Exception("phoneNumber already exist");
 
             var user = await _userRepository.GetByIdAsync(id);
 

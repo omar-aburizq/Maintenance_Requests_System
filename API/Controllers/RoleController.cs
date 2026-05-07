@@ -1,5 +1,4 @@
 ﻿using Application.Services.RoleService;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -17,7 +16,7 @@ namespace API.Controllers
         [HttpGet("GetAllRoles")]
         public IActionResult GetAllRoles()
         {
-            var roles =  _roleService.GetAllRoles();
+            var roles = _roleService.GetAllRoles();
             return Ok(roles);
         }
     }

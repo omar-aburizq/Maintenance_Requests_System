@@ -1,6 +1,4 @@
-﻿using Domain.Entities;
-
-namespace Application.Services.UserService.DTOs
+﻿namespace Application.Services.UserService.DTOs
 {
     public class GetAllUsersDto
     {

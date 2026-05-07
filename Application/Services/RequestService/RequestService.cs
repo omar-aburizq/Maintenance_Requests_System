@@ -1,8 +1,12 @@
 ﻿using Application.Repositories;
+using Application.Services.CurrentUserService;
 using Application.Services.RequestService.DTOs;
 using Domain.Entities;
 using Domain.Enums;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using System.Net;
 
 namespace Application.Services.RequestService
 {
@@ -12,13 +16,19 @@ namespace Application.Services.RequestService
         private readonly IGenericRepository<RequestDetail> _requestDetailRepository;
         private readonly IGenericRepository<Category> _categoryRepository;
         private readonly IGenericRepository<User> _userRepository;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public RequestService(IGenericRepository<Request> requestRepository, IGenericRepository<RequestDetail> requestDetailRepository, IGenericRepository<Category> categoryRepository , IGenericRepository<User> userRepository)
-        {
+        public RequestService(IGenericRepository<Request> requestRepository, IGenericRepository<RequestDetail> requestDetailRepository, IGenericRepository<Category> categoryRepository , IGenericRepository<User> userRepository, ICurrentUserService currentUserService , IConfiguration configuration , IHttpContextAccessor httpContextAccessor)
+        { 
             _requestRepository = requestRepository;
             _requestDetailRepository = requestDetailRepository;
             _categoryRepository = categoryRepository;
             _userRepository = userRepository;
+            _currentUserService = currentUserService;
+            _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task CreateRequest(CreateRequestDto input)
@@ -27,8 +37,7 @@ namespace Application.Services.RequestService
             if (!(await _categoryRepository.GetAll().AnyAsync(x => x.Id == input.CategoryId)))
                 throw new Exception("Category doesn't exist");
 
-            if (!(await _userRepository.GetAll().AnyAsync(x => x.Id == input.EmploeeyId)))
-                throw new Exception("Employee doesn't exist");
+            var employeeId = _currentUserService.UserId.Value;
 
             var data = new Request()
             {
@@ -38,23 +47,48 @@ namespace Application.Services.RequestService
                 CreatedAt = DateTime.UtcNow,
                 Status = RequestStatus.New,
                 CategoryId = input.CategoryId,
-                EmploeeyId = input.EmploeeyId,
+                EmploeeyId = employeeId,
             };
             await _requestRepository.InsertAsync(data);
             await _requestRepository.SaveChangesAsync();
 
+            string? phtoUrl = null;
+
+            if (input.CreateRequestDitails.Phto != null)
+                phtoUrl = await UploadImage(input.CreateRequestDitails.Phto);
+
             var detail = new RequestDetail()
             {
                 Id = Guid.NewGuid(),
-                Location = input.RequestDitail.Location,
-                EmployeeNotes = input.RequestDitail.EmployeeNotes ?? "",
-                TechnicianNotes = null ,
-                PhotoURL = input.RequestDitail.ImageURL ?? null,  
                 RequestId = data.Id,
+                Location = input.CreateRequestDitails.Location,
+                EmployeeNotes = input.CreateRequestDitails.EmployeeNotes ,
+                PhotoURL = phtoUrl
             };
             await _requestDetailRepository.InsertAsync(detail);
             await _requestDetailRepository.SaveChangesAsync();
         }
+
+        private async Task<string> UploadImage(IFormFile imag)
+        {
+            var baseUploadPath = _configuration["FileStorage:UploadPath"];
+            var UploadsFolder = Path.Combine(baseUploadPath, "Requests");
+
+            if(!Directory.Exists(UploadsFolder))
+                Directory.CreateDirectory(UploadsFolder);
+
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imag.FileName);
+            var filePath = Path.Combine(UploadsFolder, fileName);
+
+            using (var fileStream = new FileStream(filePath,FileMode.Create))
+                await imag.CopyToAsync(fileStream);
+
+            var request = _httpContextAccessor.HttpContext.Request;
+            var baseUrl = $"{request.Scheme}://{request.Host}";
+
+            return $"{baseUrl}/External/Requests/{fileName}";
+        }
+
 
         public async Task DeleteRequest(Guid id)
         {
@@ -110,7 +144,7 @@ namespace Application.Services.RequestService
                 TechnicianName = request.Technician.Name,
                 EmployeeName = request.Emploeey.Name,
                 CategoryName = request.Category.Name,
-                GetRequestDetailByIdDto = new GetRequestDetailByIdDto
+                GetRequestDetailsById = new GetRequestDetailByIdDto
                 {
                     Location = detail.Location,
                     EmployeeNotes = detail.EmployeeNotes,
@@ -140,9 +174,9 @@ namespace Application.Services.RequestService
             data.Description = input.Description;
             data.CategoryId = input.CategoryId;
 
-            detail.PhotoURL = input.UpdateRequestDetailByIdDto.PhotoURL;
-            detail.Location = input.UpdateRequestDetailByIdDto.Location;
-            detail.EmployeeNotes = input.UpdateRequestDetailByIdDto.EmployeeNotes;
+            detail.PhotoURL = input.UpdateRequestDetails.PhotoURL;
+            detail.Location = input.UpdateRequestDetails.Location;
+            detail.EmployeeNotes = input.UpdateRequestDetails.EmployeeNotes;
 
             _requestRepository.Update(data);
             _requestDetailRepository.Update(detail);

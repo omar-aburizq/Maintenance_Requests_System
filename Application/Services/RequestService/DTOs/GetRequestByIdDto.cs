@@ -13,7 +13,7 @@ namespace Application.Services.RequestService.DTOs
         public string CategoryName { get; set; }
         public string EmployeeName { get; set; }
         public string TechnicianName { get; set; }
-        public GetRequestDetailByIdDto GetRequestDetailByIdDto {  get; set; }
+        public GetRequestDetailByIdDto GetRequestDetailsById {  get; set; }
     }
 
     public class GetRequestDetailByIdDto

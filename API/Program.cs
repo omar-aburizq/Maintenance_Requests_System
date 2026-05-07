@@ -1,12 +1,15 @@
 using Application.Repositories;
 using Application.Services.CategoryService;
+using Application.Services.CurrentUserService;
 using Application.Services.RequestService;
 using Application.Services.RoleService;
 using Application.Services.UserService;
 using Infrastructuer.Context;
 using Infrastructuer.Data;
 using Infrastructuer.Repositories;
+using Infrastructuer.Services.CurrentUserService;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +19,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddEndpointsApiExplorer();
+
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -54,22 +61,39 @@ builder.Services.AddScoped(typeof(IUserService), typeof(UserService));
 builder.Services.AddScoped(typeof(IRoleService), typeof(RoleService));
 builder.Services.AddScoped(typeof(ICategoryService), typeof(CategoryService));
 builder.Services.AddScoped(typeof(IRequestService), typeof(RequestService));
+builder.Services.AddScoped(typeof(ICurrentUserService), typeof(CurrentUserService));
 
 
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
+
 UserSeedData.UserSeed(app.Services);
 
 app.UseSwagger();
+
 app.UseSwaggerUI();
 
-// Configure the HTTP request pipeline.
-
 app.UseHttpsRedirection();
+
+app.UseStaticFiles(); // setup static file for internal
+
+var uploadPath = builder.Configuration["FileStorage:UploadPath"]; // setup static file for external storage 
+
+if (!string.IsNullOrEmpty(uploadPath))
+{
+    if(!Directory.Exists(uploadPath))
+        Directory.CreateDirectory(uploadPath);
+
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(uploadPath),
+        RequestPath = "/External"
+    });
+}
 
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
-

@@ -1,4 +1,5 @@
 ﻿using Domain.Enums;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Services.RequestService.DTOs
 {
@@ -7,15 +8,14 @@ namespace Application.Services.RequestService.DTOs
         public string Title { get; set; }
         public string Description { get; set; }
         public Guid CategoryId { get; set; }
-        public Guid EmploeeyId { get; set; }
-        public CreateRequestDetailDto RequestDitail { get; set; }
+        public CreateRequestDetailDto CreateRequestDitails { get; set; }
     }
 
     public class CreateRequestDetailDto
     {
         public string Location { get; set; }
-        public string? EmployeeNotes { get; set; }
-        public string? ImageURL { get; set; }
+        public string EmployeeNotes { get; set; }
+        public IFormFile? Phto { get; set; } // Install Microsoft.AspNetCore.Http.Abstractions
     }
 
 }

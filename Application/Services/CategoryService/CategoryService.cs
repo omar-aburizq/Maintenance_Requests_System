@@ -16,7 +16,7 @@ namespace Application.Services.CategoryService
         public async Task CreateCategory(CreateCategoryDto input)
         {
             if (await _categoryRepository.GetAll().AnyAsync(x => x.Name.ToLower().Trim() == input.Name.ToLower().Trim()))
-                throw new Exception("CategoryName Already Exist");
+                throw new Exception("category name already exist");
 
             var data = new Category
             {
@@ -33,13 +33,13 @@ namespace Application.Services.CategoryService
             var category = await _categoryRepository.GetAll().Include(x => x.TechnicianCategoryies).Include(x => x.Requests).FirstOrDefaultAsync(x => x.Id == id);
 
             if (category == null)
-                throw new Exception("Category not found");
+                throw new Exception("category not found");
 
             if (category.TechnicianCategoryies.Any())
-                throw new Exception("There are Technicians under this category");
+                throw new Exception("there are technicians under this category");
 
             if (category.Requests.Any())
-                throw new Exception("There are Requests under this category");
+                throw new Exception("there are requests under this category");
 
             _categoryRepository.Delete(category);
             await _categoryRepository.SaveChangesAsync();
@@ -61,7 +61,7 @@ namespace Application.Services.CategoryService
             var data = await _categoryRepository.GetByIdAsync(id);
 
             if (data == null)
-                throw new Exception("Category not found");
+                throw new Exception("category not found");
 
             var result = new GetCategoryByIdDto
             {
@@ -80,7 +80,7 @@ namespace Application.Services.CategoryService
             var data = await _categoryRepository.GetByIdAsync(id);
 
             if (data == null)
-                throw new Exception("Category not found");
+                throw new Exception("category not found");
 
             data.Name = input.Name.ToLower().Trim();
             data.Description = input.Description;
