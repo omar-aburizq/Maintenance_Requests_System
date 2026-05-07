@@ -41,7 +41,7 @@ namespace Infrastructuer.Data
                     RoleId = adminRoleId,
                 };
 
-                var passwordHaser = new PasswordHasher<User>();  // Dawnlod Microsoft.Extensions.Identity.Core
+                var passwordHaser = new PasswordHasher<User>();  // Install Microsoft.Extensions.Identity.Core
                 user.Password = passwordHaser.HashPassword(user, adminPassword);
 
                 context.Users.Add(user);

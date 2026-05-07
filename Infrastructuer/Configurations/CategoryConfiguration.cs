@@ -43,5 +43,6 @@ namespace Infrastructuer.Configurations
                 }
             );
         }
+
     }
 }

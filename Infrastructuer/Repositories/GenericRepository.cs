@@ -49,5 +49,6 @@ namespace Infrastructuer.Repositories
         {
             _dbSet.Update(input);
         }
+
     }
 }

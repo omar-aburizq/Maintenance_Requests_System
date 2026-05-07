@@ -48,12 +48,13 @@ builder.Services.AddSwaggerGen(c =>
     c.AddSecurityRequirement(securityReq);
 });
 
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped(typeof(IUserService), typeof(UserService));
 builder.Services.AddScoped(typeof(IRoleService), typeof(RoleService));
 builder.Services.AddScoped(typeof(ICategoryService), typeof(CategoryService));
 builder.Services.AddScoped(typeof(IRequestService), typeof(RequestService));
+
 
 var app = builder.Build();
 
