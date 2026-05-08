@@ -31,15 +31,15 @@ namespace API.Controllers
         [HttpGet("GetAllCategories")]
         public async Task<IActionResult> GetAllCategories()
         {
-            var users = await _categoryService.GetAllCategories();
-            return Ok(users);
+            var categories = await _categoryService.GetAllCategories();
+            return Ok(categories);
         }
 
         [HttpGet("GetCategoryById")]
         public async Task<IActionResult> GetCategoryById(Guid id)
         {
-            var users = await _categoryService.GetCategoryById(id);
-            return Ok(users);
+            var category = await _categoryService.GetCategoryById(id);
+            return Ok(category);
         }
 
         [HttpDelete("DeleteCategory")]

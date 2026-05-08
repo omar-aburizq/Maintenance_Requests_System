@@ -4,6 +4,6 @@ namespace Application.Services.RoleService
 {
     public interface IRoleService
     {
-        List<GetAllRolesDto> GetAllRoles();
+        Task<List<GetAllRolesDto>> GetAllRoles();
     }
 }

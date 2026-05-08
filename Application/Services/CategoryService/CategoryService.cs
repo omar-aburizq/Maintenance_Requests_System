@@ -21,8 +21,8 @@ namespace Application.Services.CategoryService
             var data = new Category
             {
                 Id = Guid.NewGuid(),
-                Name = input.Name.ToLower().Trim(),
-                Description = input.Description,
+                Name = input.Name,
+                Description = input.Description?.Trim(),
             };
             await _categoryRepository.InsertAsync(data);
             await _categoryRepository.SaveChangesAsync();
@@ -74,16 +74,16 @@ namespace Application.Services.CategoryService
 
         public async Task UpdateCategory(Guid id, UpdateCategoryDto input)
         {
-            if (await _categoryRepository.GetAll().AnyAsync(x => x.Name.ToLower().Trim() == input.Name.ToLower().Trim() && x.Id != id))
-                throw new Exception("CategoryName Already Exist");
-
             var data = await _categoryRepository.GetByIdAsync(id);
 
             if (data == null)
                 throw new Exception("category not found");
 
-            data.Name = input.Name.ToLower().Trim();
-            data.Description = input.Description;
+            if (await _categoryRepository.GetAll().AnyAsync(x => x.Name.ToLower().Trim() == input.Name.ToLower().Trim() && x.Id != id))
+                throw new Exception("CategoryName Already Exist");
+
+            data.Name = input.Name;
+            data.Description = input.Description?.Trim();
 
             _categoryRepository.Update(data);
             await _categoryRepository.SaveChangesAsync();

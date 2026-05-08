@@ -14,9 +14,9 @@ namespace API.Controllers
         }
 
         [HttpGet("GetAllRoles")]
-        public IActionResult GetAllRoles()
+        public async Task<IActionResult> GetAllRoles()
         {
-            var roles = _roleService.GetAllRoles();
+            var roles = await _roleService.GetAllRoles();
             return Ok(roles);
         }
     }

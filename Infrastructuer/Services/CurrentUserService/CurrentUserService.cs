@@ -17,7 +17,9 @@ namespace Infrastructuer.Services.CurrentUserService
         {
             get
             {
-                return Guid.Parse(_httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var userId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                return Guid.TryParse(userId, out var id) ? id : null;
             }
         }
 
@@ -53,6 +55,13 @@ namespace Infrastructuer.Services.CurrentUserService
             }
         }
 
+        public string? Location
+        {
+            get
+            {
+                return _httpContextAccessor.HttpContext?.User?.FindFirst("location")?.Value;
+            }
+        }
 
     }
 }

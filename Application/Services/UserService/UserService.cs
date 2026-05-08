@@ -9,9 +9,11 @@ namespace Application.Services.UserService
     public class UserService : IUserService
     {
         private readonly IGenericRepository<User> _userRepository;
-        public UserService(IGenericRepository<User> userRepository)
+        private readonly IGenericRepository<Role> _roleRepository;
+        public UserService(IGenericRepository<User> userRepository, IGenericRepository<Role> roleRepository)
         {
             _userRepository = userRepository;
+            _roleRepository = roleRepository;
         }
 
         public async Task CreateUser(CreateUserDto input)
@@ -22,13 +24,16 @@ namespace Application.Services.UserService
             if (await _userRepository.GetAll().AnyAsync(x => x.PhoneNumber.Trim() == input.PhoneNumber.Trim()))
                 throw new Exception("PhoneNumber Already Exist");
 
+            if (!await _roleRepository.GetAll().AnyAsync(x => x.Id == input.RoleId))
+                throw new Exception("Role not found");
+
             var data = new User
             {
                 Id = Guid.NewGuid(),
-                Name = input.Name,
+                Name = input.Name.Trim(),
                 Email = input.Email.ToLower().Trim(),
                 PhoneNumber = input.PhoneNumber.Trim(),
-                Location = input.Location,
+                Location = input.Location?.Trim(),
                 RoleId = input.RoleId,
             };
             var PasswordHasher = new PasswordHasher<User>();  // Install Microsoft.Extensions.Identity.Core
@@ -81,7 +86,7 @@ namespace Application.Services.UserService
 
         public async Task<GetUserDto> GetUserById(Guid id)
         {
-            var user = _userRepository.GetAll().Include(x => x.Role).FirstOrDefault(x => x.Id == id);
+            var user = await _userRepository.GetAll().Include(x => x.Role).FirstOrDefaultAsync(x => x.Id == id);
 
             if (user == null)
                 throw new Exception("User not found");
@@ -106,15 +111,18 @@ namespace Application.Services.UserService
             if (await _userRepository.GetAll().AnyAsync(x => x.PhoneNumber.Trim() == input.PhoneNumber.Trim() && x.Id != id))
                 throw new Exception("phoneNumber already exist");
 
+            if (!await _roleRepository.GetAll().AnyAsync(x => x.Id == input.RoleId))
+                throw new Exception("Role not found");
+
             var user = await _userRepository.GetByIdAsync(id);
 
             if (user == null)
                 throw new Exception("User not found");
 
-            user.Name = input.Name;
+            user.Name = input.Name.Trim();
             user.Email = input.Email.ToLower().Trim();
             user.PhoneNumber = input.PhoneNumber.Trim();
-            user.Location = input.Location;
+            user.Location = input.Location?.Trim();
             user.RoleId = input.RoleId;
 
             _userRepository.Update(user);

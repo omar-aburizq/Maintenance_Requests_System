@@ -1,16 +1,21 @@
 using Application.Repositories;
+using Application.Services.AuthService;
 using Application.Services.CategoryService;
 using Application.Services.CurrentUserService;
 using Application.Services.RequestService;
 using Application.Services.RoleService;
+using Application.Services.TechnicianService;
 using Application.Services.UserService;
 using Infrastructuer.Context;
 using Infrastructuer.Data;
 using Infrastructuer.Repositories;
 using Infrastructuer.Services.CurrentUserService;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +25,24 @@ builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
+var jwtSection = builder.Configuration.GetSection("Jwt");
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)  // Install Microsoft.AspNetCore.Authentication.JwtBearer
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSection["Issuer"],
+            ValidAudience = jwtSection["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection["Key"])),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -28,7 +51,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "IMS API",
+        Title = "Maintenance_Requests_System API",
         Version = "v1"
     });
 
@@ -61,7 +84,9 @@ builder.Services.AddScoped(typeof(IUserService), typeof(UserService));
 builder.Services.AddScoped(typeof(IRoleService), typeof(RoleService));
 builder.Services.AddScoped(typeof(ICategoryService), typeof(CategoryService));
 builder.Services.AddScoped(typeof(IRequestService), typeof(RequestService));
+builder.Services.AddScoped(typeof(ITechnicianCategoryService), typeof(TechnicianCategoryService));
 builder.Services.AddScoped(typeof(ICurrentUserService), typeof(CurrentUserService));
+builder.Services.AddScoped(typeof(IAuthService), typeof(AuthService));
 
 
 var app = builder.Build();
@@ -75,6 +100,10 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication(); 
+
+app.UseAuthorization();
 
 app.UseStaticFiles(); // setup static file for internal
 

@@ -7,5 +7,6 @@
         string? Email { get; }
         string? MobilePhone { get; }
         string? Role { get; }
+        string? Location { get; }
     }
 }

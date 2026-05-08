@@ -1,6 +1,7 @@
 ﻿using Application.Repositories;
 using Application.Services.RoleService.DTOs;
 using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services.RoleService
 {
@@ -12,16 +13,17 @@ namespace Application.Services.RoleService
             _roleRepository = roleRepository;
         }
 
-        public List<GetAllRolesDto> GetAllRoles()
+        public async Task<List<GetAllRolesDto>> GetAllRoles()
         {
             var roles = _roleRepository.GetAll();
 
-            var result = roles.Select(x => new GetAllRolesDto
+            var result = await roles.Select(x => new GetAllRolesDto
             {
                 Id = x.Id,
                 Name = x.Name,
+                Code = x.Code
 
-            }).ToList();
+            }).ToListAsync();
             return result;
 
         }
