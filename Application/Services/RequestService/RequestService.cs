@@ -6,7 +6,6 @@ using Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using System.Net;
 
 namespace Application.Services.RequestService
 {
@@ -14,18 +13,18 @@ namespace Application.Services.RequestService
     {
         private readonly IGenericRepository<Request> _requestRepository;
         private readonly IGenericRepository<RequestDetail> _requestDetailRepository;
+        private readonly IGenericRepository<RequestHistory> _requestHistoryRepository;
         private readonly IGenericRepository<Category> _categoryRepository;
-        private readonly IGenericRepository<User> _userRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public RequestService(IGenericRepository<Request> requestRepository, IGenericRepository<RequestDetail> requestDetailRepository, IGenericRepository<Category> categoryRepository , IGenericRepository<User> userRepository, ICurrentUserService currentUserService , IConfiguration configuration , IHttpContextAccessor httpContextAccessor)
-        { 
+        public RequestService(IGenericRepository<Request> requestRepository, IGenericRepository<RequestDetail> requestDetailRepository, IGenericRepository<RequestHistory> requestHistoryRepository, IGenericRepository<Category> categoryRepository, ICurrentUserService currentUserService, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        {
             _requestRepository = requestRepository;
             _requestDetailRepository = requestDetailRepository;
+            _requestHistoryRepository = requestHistoryRepository;
             _categoryRepository = categoryRepository;
-            _userRepository = userRepository;
             _currentUserService = currentUserService;
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
@@ -62,7 +61,7 @@ namespace Application.Services.RequestService
                 Id = Guid.NewGuid(),
                 RequestId = data.Id,
                 Location = input.CreateRequestDitails.Location,
-                EmployeeNotes = input.CreateRequestDitails.EmployeeNotes ,
+                EmployeeNotes = input.CreateRequestDitails.EmployeeNotes,
                 PhotoURL = phtoUrl
             };
             await _requestDetailRepository.InsertAsync(detail);
@@ -74,13 +73,13 @@ namespace Application.Services.RequestService
             var baseUploadPath = _configuration["FileStorage:UploadPath"];
             var UploadsFolder = Path.Combine(baseUploadPath, "Requests");
 
-            if(!Directory.Exists(UploadsFolder))
+            if (!Directory.Exists(UploadsFolder))
                 Directory.CreateDirectory(UploadsFolder);
 
             var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imag.FileName);
             var filePath = Path.Combine(UploadsFolder, fileName);
 
-            using (var fileStream = new FileStream(filePath,FileMode.Create))
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
                 await imag.CopyToAsync(fileStream);
 
             var request = _httpContextAccessor.HttpContext.Request;
@@ -120,7 +119,7 @@ namespace Application.Services.RequestService
                 TechnicianName = x.Technician.Name,
                 EmployeeName = x.Emploeey.Name,
                 CategoryName = x.Category.Name,
-            }).OrderBy(x=> x.CreatedAt).ToListAsync();
+            }).OrderBy(x => x.CreatedAt).ToListAsync();
 
             return result;
         }
@@ -148,7 +147,7 @@ namespace Application.Services.RequestService
                 {
                     Location = detail.Location,
                     EmployeeNotes = detail.EmployeeNotes,
-                    TechnicianNotes = detail.TechnicianNotes ,
+                    TechnicianNotes = detail.TechnicianNotes,
                     PhotoURL = detail.PhotoURL,
                 }
             };
