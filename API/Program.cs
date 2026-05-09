@@ -4,7 +4,6 @@ using Application.Services.CategoryService;
 using Application.Services.CurrentUserService;
 using Application.Services.RequestService;
 using Application.Services.RoleService;
-using Application.Services.TechnicianService;
 using Application.Services.UserService;
 using Infrastructuer.Context;
 using Infrastructuer.Data;
@@ -84,7 +83,6 @@ builder.Services.AddScoped(typeof(IUserService), typeof(UserService));
 builder.Services.AddScoped(typeof(IRoleService), typeof(RoleService));
 builder.Services.AddScoped(typeof(ICategoryService), typeof(CategoryService));
 builder.Services.AddScoped(typeof(IRequestService), typeof(RequestService));
-builder.Services.AddScoped(typeof(ITechnicianCategoryService), typeof(TechnicianCategoryService));
 builder.Services.AddScoped(typeof(ICurrentUserService), typeof(CurrentUserService));
 builder.Services.AddScoped(typeof(IAuthService), typeof(AuthService));
 
@@ -111,7 +109,7 @@ var uploadPath = builder.Configuration["FileStorage:UploadPath"]; // setup stati
 
 if (!string.IsNullOrEmpty(uploadPath))
 {
-    if(!Directory.Exists(uploadPath))
+    if (!Directory.Exists(uploadPath))
         Directory.CreateDirectory(uploadPath);
 
     app.UseStaticFiles(new StaticFileOptions
