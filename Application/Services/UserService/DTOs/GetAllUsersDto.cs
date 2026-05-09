@@ -8,5 +8,9 @@
         public string PhoneNumber { get; set; }
         public string? Location { get; set; }
         public string RoleName { get; set; }
+
+        public List<GetUsersTechnicianCategoriesDto>? TechnicianCategories { get; set; }
     }
+
+
 }

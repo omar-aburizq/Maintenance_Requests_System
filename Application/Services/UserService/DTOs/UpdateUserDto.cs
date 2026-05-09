@@ -7,5 +7,6 @@
         public string PhoneNumber { get; set; }
         public string? Location { get; set; }
         public Guid RoleId { get; set; }
+        public List<Guid>? CategoryIds { get; set; }
     }
 }

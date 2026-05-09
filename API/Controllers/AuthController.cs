@@ -34,5 +34,13 @@ namespace API.Controllers
             var result = await _authService.RefreshToken(input);
             return Ok(result);
         }
+
+        [HttpPost("Logout")]
+        public async Task<IActionResult> Logout([FromBody] RefreshTokenDto input)
+        {
+            await _authService.Logout(input);
+
+            return Ok("Logged out successfully");
+        }
     }
 }

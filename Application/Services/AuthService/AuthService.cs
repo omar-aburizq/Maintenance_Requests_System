@@ -48,7 +48,7 @@ namespace Application.Services.AuthService
             await _refreshTokenRepository.InsertAsync(new Token  // RefreshToken Entity First
             {
                 UserId = user.Id,
-                TokenStr = accessToken,
+                TokenStr = refershToken,
                 ExpiryDate = DateTime.UtcNow.AddDays(7)
             });
             await _refreshTokenRepository.SaveChangesAsync();
@@ -63,7 +63,7 @@ namespace Application.Services.AuthService
                 RoleName = user.Role.Name,
                 RoleCode = user.Role.Code,
 
-                AcessToken = accessToken,
+                AccessToken = accessToken,
                 RefershToken = refershToken,
             };
             return result;
@@ -72,7 +72,7 @@ namespace Application.Services.AuthService
 
         private async Task<string> GenerateAccessToken(User user) // inject IConfiguration First
         {
-            var jwtSection = _configuration.GetSection("jwt");
+            var jwtSection = _configuration.GetSection("Jwt");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection["Key"])); // Install Microsoft.IdentityModel.Tokens
 
             var claims = new List<Claim>  // List Save current User Information  
@@ -85,7 +85,7 @@ namespace Application.Services.AuthService
                 new Claim("location", user.Location ?? "")
             };
 
-            var tokenDescriptor = new SecurityTokenDescriptor  
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddMinutes(5),
@@ -100,7 +100,7 @@ namespace Application.Services.AuthService
             return handler.WriteToken(token);
         }
 
-        private string GenerateRefreshToken()  
+        private string GenerateRefreshToken()
         {
             var random = new byte[64];
             RandomNumberGenerator.Fill(random);
@@ -111,7 +111,15 @@ namespace Application.Services.AuthService
         public async Task ChangeUserPassword(ChangeUserPasswordDto input)
         {
             var UserId = _currentUserService.UserId;
+
+            if (UserId == null)
+                throw new Exception("User not authenticated");
+
             var user = await _userRepository.GetByIdAsync(UserId.Value);
+
+            if (user == null)
+                throw new Exception("User not found");
+
 
             var passwordHasher = new PasswordHasher<User>();
             var PasswordStatus = passwordHasher.VerifyHashedPassword(user, user.Password, input.CurrentPassword);
@@ -128,19 +136,35 @@ namespace Application.Services.AuthService
             await _userRepository.SaveChangesAsync();
         }
 
+
         public async Task<string> RefreshToken(RefreshTokenDto input)
         {
-            var refershToken = await _refreshTokenRepository.GetAll().AllAsync(x => x.TokenStr == input.TokenStr && x.UserId == _currentUserService.UserId.Value && x.ExpiryDate > DateTime.Now);
+            var refreshToken = await _refreshTokenRepository.GetAll().Include(x => x.User).ThenInclude(x => x.Role).FirstOrDefaultAsync(x => x.TokenStr == input.TokenStr && x.ExpiryDate > DateTime.UtcNow);
 
-            if (refershToken)
-            {
-                var user = await _userRepository.GetAll().Include(x => x.Role).FirstOrDefaultAsync(x => x.Id == _currentUserService.UserId.Value);
-                var accessToken = await GenerateAccessToken(user);
+            if (refreshToken == null)
+                throw new Exception("Invalid Refresh Token");
 
-                return accessToken;
-            }
-            return null;
+            var accessToken = await GenerateAccessToken(refreshToken.User);
+
+            return accessToken;
         }
 
+        public async Task Logout(RefreshTokenDto input)
+        {
+            var userId = _currentUserService.UserId;
+
+            if (userId == null)
+                throw new Exception("User not authenticated");
+
+
+            var refreshToken = await _refreshTokenRepository.GetAll().FirstOrDefaultAsync(x => x.TokenStr == input.TokenStr);
+
+            if (refreshToken == null)
+                throw new Exception("Refresh Token Not Found");
+
+            _refreshTokenRepository.Delete(refreshToken);
+
+            await _refreshTokenRepository.SaveChangesAsync();
+        }
     }
 }

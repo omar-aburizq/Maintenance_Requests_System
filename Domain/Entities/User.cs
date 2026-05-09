@@ -8,6 +8,7 @@
         public string PhoneNumber { get; set; }
         public string Password { get; set; }
         public string? Location { get; set; }
+        public bool IsActive { get; set; } = true;
 
         public Guid RoleId { get; set; }
         public Role Role { get; set; }

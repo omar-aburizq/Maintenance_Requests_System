@@ -7,5 +7,6 @@ namespace Application.Services.AuthService
         Task<LoginResponseDto> Login(LoginRequestDto input);
         Task ChangeUserPassword(ChangeUserPasswordDto input);
         Task<string> RefreshToken(RefreshTokenDto input);
+        Task Logout(RefreshTokenDto input);
     }
 }

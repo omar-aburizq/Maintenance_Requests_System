@@ -101,11 +101,11 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication(); 
+app.UseStaticFiles(); // setup static file for internal
+
+app.UseAuthentication();
 
 app.UseAuthorization();
-
-app.UseStaticFiles(); // setup static file for internal
 
 var uploadPath = builder.Configuration["FileStorage:UploadPath"]; // setup static file for external storage 
 
@@ -120,8 +120,6 @@ if (!string.IsNullOrEmpty(uploadPath))
         RequestPath = "/External"
     });
 }
-
-app.UseAuthorization();
 
 app.MapControllers();
 

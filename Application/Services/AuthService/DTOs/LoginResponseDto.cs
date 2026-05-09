@@ -12,7 +12,7 @@ namespace Application.Services.AuthService.DTOs
         public string RoleName { get; set; }
         public SystemRole RoleCode { get; set; }
 
-        public string AcessToken { get; set; }
+        public string AccessToken { get; set; }
         public string RefershToken { get; set; }
     }
 }

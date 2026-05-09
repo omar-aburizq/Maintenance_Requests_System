@@ -42,6 +42,14 @@ namespace API.Controllers
             return Ok(user);
         }
 
+        [HttpGet("GetUsersTechnicians")]
+        public async Task<IActionResult> GetUsersTechnicians(Guid? categoryId = null)
+        {
+            var technicians = await _userService.GetUsersTechnicians(categoryId);
+
+            return Ok(technicians);
+        }
+
         [HttpDelete("DeleteUser")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
