@@ -1,9 +1,13 @@
 ﻿using Application.Services.UserService;
 using Application.Services.UserService.DTOs;
+using Domain.Entities;
+using Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
@@ -14,6 +18,7 @@ namespace API.Controllers
             _userService = userService;
         }
 
+        [AllowAnonymous]
         [HttpPost("CreateUser")]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserDto input)
         {
@@ -21,6 +26,7 @@ namespace API.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = $"{nameof(SystemRole.Admin)},{nameof(SystemRole.Employee)}")]
         [HttpPut("UpdateUser")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto input)
         {
@@ -28,6 +34,7 @@ namespace API.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = nameof(SystemRole.Admin))]
         [HttpGet("GetAllUsers")]
         public async Task<IActionResult> GetAllUsers(string? name, string? email)
         {
@@ -35,6 +42,7 @@ namespace API.Controllers
             return Ok(users);
         }
 
+        [Authorize(Roles = nameof(SystemRole.Admin))]
         [HttpGet("GetUserById")]
         public async Task<IActionResult> GetUserById(Guid id)
         {
@@ -42,6 +50,7 @@ namespace API.Controllers
             return Ok(user);
         }
 
+        [Authorize(Roles = nameof(SystemRole.Admin))]
         [HttpGet("GetUsersTechnicians")]
         public async Task<IActionResult> GetUsersTechnicians(Guid? categoryId = null)
         {
@@ -50,6 +59,7 @@ namespace API.Controllers
             return Ok(technicians);
         }
 
+        [Authorize(Roles = nameof(SystemRole.Admin))]
         [HttpDelete("DeleteUser")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {

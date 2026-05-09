@@ -1,9 +1,13 @@
 ﻿using Application.Services.CategoryService;
 using Application.Services.CategoryService.DTOs;
+using Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [Authorize]
+    [Authorize(Roles = nameof(SystemRole.Admin))]
     [Route("api/[controller]")]
     [ApiController]
     public class CategoryController : ControllerBase

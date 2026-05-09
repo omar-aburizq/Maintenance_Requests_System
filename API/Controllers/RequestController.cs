@@ -1,9 +1,12 @@
 ﻿using Application.Services.RequestService;
 using Application.Services.RequestService.DTOs;
+using Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class RequestController : ControllerBase
@@ -14,6 +17,7 @@ namespace API.Controllers
             _requestService = requestService;
         }
 
+        [Authorize(Roles = nameof(SystemRole.Employee))]
         [HttpPost("CreateRequest")]
         public async Task<IActionResult> CreateRequest([FromForm] CreateRequestDto input)
         {
@@ -21,6 +25,7 @@ namespace API.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = nameof(SystemRole.Admin))]
         [HttpGet("GetAllRequests")]
         public async Task<IActionResult> GetAllRequests()
         {
@@ -28,6 +33,7 @@ namespace API.Controllers
             return Ok(Request);
         }
 
+        [Authorize(Roles = $"{nameof(SystemRole.Admin)},{nameof(SystemRole.Employee)},{nameof(SystemRole.Technician)}")]
         [HttpGet("GetRequestById")]
         public async Task<IActionResult> GetRequestById(Guid id)
         {
@@ -35,6 +41,7 @@ namespace API.Controllers
             return Ok(Request);
         }
 
+        [Authorize(Roles = $"{nameof(SystemRole.Admin)},{nameof(SystemRole.Employee)}")]
         [HttpPut("UpdateRequest")]
         public async Task<IActionResult> UpdateRequest(Guid id, [FromBody] UpdateRequestDto input)
         {
@@ -42,6 +49,7 @@ namespace API.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = nameof(SystemRole.Admin))]
         [HttpDelete("DeleteRequest")]
         public async Task<IActionResult> DeleteRequest(Guid id)
         {
@@ -49,6 +57,7 @@ namespace API.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = nameof(SystemRole.Admin))]
         [HttpPut("AssignTechnician")]
         public async Task<IActionResult> AssignTechnician(Guid requestId, [FromBody] AssignTechnicianDto input)
         {
@@ -56,6 +65,7 @@ namespace API.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = $"{nameof(SystemRole.Admin)},{nameof(SystemRole.Technician)}")]
         [HttpPut("ChangeStatus")]
         public async Task<IActionResult> ChangeStatus(Guid requestId, [FromBody] ChangeRequestStatusDto input)
         {
@@ -63,6 +73,7 @@ namespace API.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = nameof(SystemRole.Employee))]
         [HttpPut("CancelRequest")]
         public async Task<IActionResult> CancelRequest(Guid requestId)
         {

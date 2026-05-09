@@ -1,9 +1,12 @@
 ﻿using Application.Services.AuthService;
 using Application.Services.AuthService.DTOs;
+using Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -14,6 +17,7 @@ namespace API.Controllers
             _authService = authService;
         }
 
+        [AllowAnonymous]
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto input)
         {
@@ -21,13 +25,15 @@ namespace API.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = $"{nameof(SystemRole.Technician)},{nameof(SystemRole.Employee)}")]
         [HttpPost("ChangeUserPassword")]
-        public async Task<IActionResult> ChangeUserPassword([FromBody] ChangeUserPasswordDto input)
+        public async Task<IActionResult> ChangePassword([FromBody] ChangeUserPasswordDto input)
         {
             await _authService.ChangeUserPassword(input);
             return Ok();
         }
 
+        [AllowAnonymous]
         [HttpPost("RefreshToken")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto input)
         {
@@ -35,6 +41,7 @@ namespace API.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = $"{nameof(SystemRole.Technician)},{nameof(SystemRole.Employee)}")]
         [HttpPost("Logout")]
         public async Task<IActionResult> Logout([FromBody] RefreshTokenDto input)
         {
