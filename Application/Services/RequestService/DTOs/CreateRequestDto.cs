@@ -15,7 +15,7 @@ namespace Application.Services.RequestService.DTOs
     {
         public string Location { get; set; }
         public string EmployeeNotes { get; set; }
-        public IFormFile? Phto { get; set; } // Install Microsoft.AspNetCore.Http.Abstractions
+        public IFormFile? Phot { get; set; } // Install Microsoft.AspNetCore.Http.Abstractions
     }
 
 }

@@ -14,16 +14,18 @@ namespace Application.Services.RequestService
         private readonly IGenericRepository<Request> _requestRepository;
         private readonly IGenericRepository<RequestDetail> _requestDetailRepository;
         private readonly IGenericRepository<RequestHistory> _requestHistoryRepository;
+        private readonly IGenericRepository<User> _userRepository;
         private readonly IGenericRepository<Category> _categoryRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public RequestService(IGenericRepository<Request> requestRepository, IGenericRepository<RequestDetail> requestDetailRepository, IGenericRepository<RequestHistory> requestHistoryRepository, IGenericRepository<Category> categoryRepository, ICurrentUserService currentUserService, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        public RequestService(IGenericRepository<Request> requestRepository, IGenericRepository<RequestDetail> requestDetailRepository, IGenericRepository<RequestHistory> requestHistoryRepository, IGenericRepository<User> userRepository, IGenericRepository<Category> categoryRepository, ICurrentUserService currentUserService, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _requestRepository = requestRepository;
             _requestDetailRepository = requestDetailRepository;
             _requestHistoryRepository = requestHistoryRepository;
+            _userRepository = userRepository;
             _categoryRepository = categoryRepository;
             _currentUserService = currentUserService;
             _configuration = configuration;
@@ -51,10 +53,11 @@ namespace Application.Services.RequestService
             await _requestRepository.InsertAsync(data);
             await _requestRepository.SaveChangesAsync();
 
+
             string? phtoUrl = null;
 
-            if (input.CreateRequestDitails.Phto != null)
-                phtoUrl = await UploadImage(input.CreateRequestDitails.Phto);
+            if (input.CreateRequestDitails.Phot != null)
+                phtoUrl = await UploadImage(input.CreateRequestDitails.Phot);
 
             var detail = new RequestDetail()
             {
@@ -116,7 +119,7 @@ namespace Application.Services.RequestService
                 Description = x.Description,
                 CreatedAt = x.CreatedAt,
                 Status = x.Status,
-                TechnicianName = x.Technician.Name,
+                TechnicianName = x.Technician != null ? x.Technician.Name : null,
                 EmployeeName = x.Emploeey.Name,
                 CategoryName = x.Category.Name,
             }).OrderBy(x => x.CreatedAt).ToListAsync();
@@ -130,6 +133,9 @@ namespace Application.Services.RequestService
 
             var detail = await _requestDetailRepository.GetAll().FirstOrDefaultAsync(x => x.RequestId == id);
 
+            if (detail == null)
+                throw new Exception("Request Detail not found");
+
             if (request == null)
                 throw new Exception("request dosnt Exist");
 
@@ -140,7 +146,7 @@ namespace Application.Services.RequestService
                 Description = request.Description,
                 CreatedAt = request.CreatedAt,
                 Status = request.Status,
-                TechnicianName = request.Technician.Name,
+                TechnicianName = request.Technician != null ? request.Technician.Name : null,
                 EmployeeName = request.Emploeey.Name,
                 CategoryName = request.Category.Name,
                 GetRequestDetailsById = new GetRequestDetailByIdDto
@@ -159,31 +165,93 @@ namespace Application.Services.RequestService
             if (!(await _categoryRepository.GetAll().AnyAsync(x => x.Id == input.CategoryId)))
                 throw new Exception("Category dosent Exist");
 
-            var data = await _requestRepository.GetByIdAsync(id);
+            var request = await _requestRepository.GetByIdAsync(id);
 
-            if (data == null)
+            if (request == null)
                 throw new Exception("Request not found");
+
+            if (request.Status != RequestStatus.New)
+                throw new Exception("Cannot update request after processing started");
 
             var detail = await _requestDetailRepository.GetAll().FirstOrDefaultAsync(x => x.RequestId == id);
 
             if (detail == null)
                 throw new Exception("Request Detail not found");
 
-            data.Title = input.Title;
-            data.Description = input.Description;
-            data.CategoryId = input.CategoryId;
+            request.Title = input.Title;
+            request.Description = input.Description;
+            request.CategoryId = input.CategoryId;
 
             detail.PhotoURL = input.UpdateRequestDetails.PhotoURL;
             detail.Location = input.UpdateRequestDetails.Location;
             detail.EmployeeNotes = input.UpdateRequestDetails.EmployeeNotes;
 
-            _requestRepository.Update(data);
+            _requestRepository.Update(request);
             _requestDetailRepository.Update(detail);
 
             await _requestDetailRepository.SaveChangesAsync();
             await _requestRepository.SaveChangesAsync();
         }
 
+        public async Task AssignTechnician(Guid requestId, Guid technicianId)
+        {
+            var request = await _requestRepository.GetByIdAsync(requestId);
+
+            if (request == null)
+                throw new Exception("Request not found");
+
+            if (request.Status == RequestStatus.Cancelled)
+                throw new Exception("Cannot assign technician to cancelled request");
+
+            if (request.Status == RequestStatus.Resolved)
+                throw new Exception("Cannot assign technician to resolved request");
+
+            var technician = await _userRepository.GetByIdAsync(technicianId);
+
+            if (technician == null)
+                throw new Exception("Technician not found");
+
+            request.TechnicianId = technicianId;
+            request.Status = RequestStatus.InProgress;
+
+            _requestRepository.Update(request);
+            await _requestRepository.SaveChangesAsync();
+        }
+
+        public async Task ChangeStatus(Guid requestId, RequestStatus status)
+        {
+            var request = await _requestRepository.GetByIdAsync(requestId);
+
+            if (request == null)
+                throw new Exception("Request not found");
+
+            if (request.Status == RequestStatus.Cancelled)
+                throw new Exception("Cannot change status for cancelled request");
+
+            if (request.TechnicianId == null)
+                throw new Exception("Request must be assigned to technician first");
+
+            request.Status = status;
+
+            _requestRepository.Update(request);
+            await _requestRepository.SaveChangesAsync();
+        }
+
+        public async Task CancelRequest(Guid requestId)
+        {
+            var request = await _requestRepository.GetByIdAsync(requestId);
+
+            if (request == null)
+                throw new Exception("Request not found");
+
+            if (request.Status != RequestStatus.New)
+                throw new Exception("Only new requests can be cancelled");
+
+            request.Status = RequestStatus.Cancelled;
+
+            _requestRepository.Update(request);
+            await _requestRepository.SaveChangesAsync();
+        }
 
     }
 }

@@ -15,7 +15,7 @@ namespace API.Controllers
         }
 
         [HttpPost("CreateRequest")]
-        public async Task<IActionResult> CreateRequest([FromBody] CreateRequestDto input)
+        public async Task<IActionResult> CreateRequest([FromForm] CreateRequestDto input)
         {
             await _requestService.CreateRequest(input);
             return Ok();
@@ -43,9 +43,30 @@ namespace API.Controllers
         }
 
         [HttpDelete("DeleteRequest")]
-        public async Task<IActionResult> RequestUser(Guid id)
+        public async Task<IActionResult> DeleteRequest(Guid id)
         {
             await _requestService.DeleteRequest(id);
+            return Ok();
+        }
+
+        [HttpPut("AssignTechnician")]
+        public async Task<IActionResult> AssignTechnician(Guid requestId, [FromBody] AssignTechnicianDto input)
+        {
+            await _requestService.AssignTechnician(requestId, input.TechnicianId);
+            return Ok();
+        }
+
+        [HttpPut("ChangeStatus")]
+        public async Task<IActionResult> ChangeStatus(Guid requestId, [FromBody] ChangeRequestStatusDto input)
+        {
+            await _requestService.ChangeStatus(requestId, input.Status);
+            return Ok();
+        }
+
+        [HttpPut("CancelRequest")]
+        public async Task<IActionResult> CancelRequest(Guid requestId)
+        {
+            await _requestService.CancelRequest(requestId);
             return Ok();
         }
     }
