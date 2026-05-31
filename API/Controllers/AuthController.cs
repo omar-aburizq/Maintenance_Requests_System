@@ -25,7 +25,7 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = $"{nameof(SystemRole.Technician)},{nameof(SystemRole.Employee)}")]
+        [Authorize]
         [HttpPost("ChangeUserPassword")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangeUserPasswordDto input)
         {
@@ -41,7 +41,7 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = $"{nameof(SystemRole.Technician)},{nameof(SystemRole.Employee)}")]
+        [Authorize]
         [HttpPost("Logout")]
         public async Task<IActionResult> Logout([FromBody] RefreshTokenDto input)
         {

@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Authorize]
     [Authorize(Roles = nameof(SystemRole.Admin))]
     [Route("api/[controller]")]
     [ApiController]

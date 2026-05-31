@@ -27,6 +27,11 @@ namespace Application.Services.UserService
             if (await _userRepository.GetAll().AnyAsync(x => x.PhoneNumber.Trim() == input.PhoneNumber.Trim()))
                 throw new Exception("PhoneNumber Already Exist");
 
+            var role = await _roleRepository.GetByIdAsync(input.RoleId);
+
+            if (role == null)
+                throw new Exception("Role not found");
+
             var data = new User
             {
                 Id = Guid.NewGuid(),
@@ -42,11 +47,6 @@ namespace Application.Services.UserService
             await _userRepository.InsertAsync(data);
             await _userRepository.SaveChangesAsync();
 
-
-            var role = await _roleRepository.GetByIdAsync(input.RoleId);
-
-            if (role == null)
-                throw new Exception("Role not found");
 
             if (role.Code == SystemRole.Technician)
             {
@@ -85,7 +85,7 @@ namespace Application.Services.UserService
             name = !string.IsNullOrEmpty(name) ? name.ToLower().Trim() : null;
             email = !string.IsNullOrEmpty(email) ? email.ToLower().Trim() : null;
 
-            var usersQuery = _userRepository.GetAll().Where(u => u.IsActive);
+            var usersQuery = _userRepository.GetAll().Where(u => u.IsActive == true);
 
             if (name != null)
                 usersQuery = usersQuery.Where(x => x.Name.ToLower().Trim().Contains(name));
@@ -130,7 +130,7 @@ namespace Application.Services.UserService
 
         public async Task<GetUserDto> GetUserById(Guid id)
         {
-            var user = await _userRepository.GetAll().Include(x => x.Role).FirstOrDefaultAsync(x => x.Id == id);
+            var user = await _userRepository.GetAll().Include(x => x.Role).FirstOrDefaultAsync(x => x.Id == id && x.IsActive);
 
             if (user == null)
                 throw new Exception("User not found");
@@ -161,7 +161,7 @@ namespace Application.Services.UserService
 
         public async Task<List<GetAllUsersDto>> GetUsersTechnicians(Guid? categoryId = null)
         {
-            var techniciansQuery = _userRepository.GetAll().Include(x => x.Role).Where(x => x.Role.Code == SystemRole.Technician);
+            var techniciansQuery = _userRepository.GetAll().Include(x => x.Role).Where(x => x.Role.Code == SystemRole.Technician && x.IsActive == true);
 
             if (categoryId.HasValue)
             {

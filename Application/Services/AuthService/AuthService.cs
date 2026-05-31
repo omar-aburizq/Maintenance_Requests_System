@@ -30,7 +30,7 @@ namespace Application.Services.AuthService
 
         public async Task<LoginResponseDto> Login(LoginRequestDto input)
         {
-            var user = await _userRepository.GetAll().Include(x => x.Role).FirstOrDefaultAsync(x => x.Email.ToLower().Trim() == input.Username.ToLower().Trim() || x.PhoneNumber.Trim() == input.Username.Trim());
+            var user = await _userRepository.GetAll().Include(x => x.Role).FirstOrDefaultAsync(x => (x.Email.ToLower().Trim() == input.Username.ToLower().Trim() || x.PhoneNumber.Trim() == input.Username.Trim()) && x.IsActive == true);
 
             if (user == null)
                 throw new Exception("userName or password invalid");
@@ -157,7 +157,7 @@ namespace Application.Services.AuthService
                 throw new Exception("User not authenticated");
 
 
-            var refreshToken = await _refreshTokenRepository.GetAll().FirstOrDefaultAsync(x => x.TokenStr == input.TokenStr);
+            var refreshToken = await _refreshTokenRepository.GetAll().FirstOrDefaultAsync(x => x.TokenStr == input.TokenStr && x.UserId == userId);
 
             if (refreshToken == null)
                 throw new Exception("Refresh Token Not Found");

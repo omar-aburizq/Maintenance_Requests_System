@@ -44,6 +44,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)  // I
             ClockSkew = TimeSpan.Zero
         };
     });
+
+// CurrentUser Service Registration
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 
