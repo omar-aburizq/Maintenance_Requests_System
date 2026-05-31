@@ -48,7 +48,7 @@ namespace Application.Services.RequestService
                 CreatedAt = DateTime.UtcNow,
                 Status = RequestStatus.New,
                 CategoryId = input.CategoryId,
-                EmploeeyId = employeeId,
+                EmployeeId = employeeId,
             };
             await _requestRepository.InsertAsync(data);
             await _requestRepository.SaveChangesAsync();
@@ -65,7 +65,7 @@ namespace Application.Services.RequestService
                 RequestId = data.Id,
                 Location = input.CreateRequestDitails.Location,
                 EmployeeNotes = input.CreateRequestDitails.EmployeeNotes,
-                PhotoURL = phtoUrl
+                PhotoUrl = phtoUrl
             };
             await _requestDetailRepository.InsertAsync(detail);
             await _requestDetailRepository.SaveChangesAsync();
@@ -110,7 +110,7 @@ namespace Application.Services.RequestService
 
         public async Task<List<GetAllRequestDto>> GetAllRequest()
         {
-            var data = _requestRepository.GetAll().Include(x => x.Category).Include(x => x.Emploeey).Include(x => x.Technician);
+            var data = _requestRepository.GetAll().Include(x => x.Category).Include(x => x.Employee).Include(x => x.Technician);
 
             var result = await data.Select(x => new GetAllRequestDto
             {
@@ -120,7 +120,7 @@ namespace Application.Services.RequestService
                 CreatedAt = x.CreatedAt,
                 Status = x.Status,
                 TechnicianName = x.Technician != null ? x.Technician.Name : null,
-                EmployeeName = x.Emploeey.Name,
+                EmployeeName = x.Employee.Name,
                 CategoryName = x.Category.Name,
             }).OrderBy(x => x.CreatedAt).ToListAsync();
 
@@ -129,7 +129,7 @@ namespace Application.Services.RequestService
 
         public async Task<GetRequestByIdDto> GetRequestById(Guid id)
         {
-            var request = await _requestRepository.GetAll().Include(x => x.Category).Include(x => x.Emploeey).Include(x => x.Technician).FirstOrDefaultAsync(x => x.Id == id);
+            var request = await _requestRepository.GetAll().Include(x => x.Category).Include(x => x.Employee).Include(x => x.Technician).FirstOrDefaultAsync(x => x.Id == id);
 
             var detail = await _requestDetailRepository.GetAll().FirstOrDefaultAsync(x => x.RequestId == id);
 
@@ -147,14 +147,14 @@ namespace Application.Services.RequestService
                 CreatedAt = request.CreatedAt,
                 Status = request.Status,
                 TechnicianName = request.Technician != null ? request.Technician.Name : null,
-                EmployeeName = request.Emploeey.Name,
+                EmployeeName = request.Employee.Name,
                 CategoryName = request.Category.Name,
                 GetRequestDetailsById = new GetRequestDetailByIdDto
                 {
                     Location = detail.Location,
                     EmployeeNotes = detail.EmployeeNotes,
                     TechnicianNotes = detail.TechnicianNotes,
-                    PhotoURL = detail.PhotoURL,
+                    PhotoUrl = detail.PhotoUrl,
                 }
             };
             return data;
@@ -182,7 +182,7 @@ namespace Application.Services.RequestService
             request.Description = input.Description;
             request.CategoryId = input.CategoryId;
 
-            detail.PhotoURL = input.UpdateRequestDetails.PhotoURL;
+            detail.PhotoUrl = input.UpdateRequestDetails.PhotoUrl;
             detail.Location = input.UpdateRequestDetails.Location;
             detail.EmployeeNotes = input.UpdateRequestDetails.EmployeeNotes;
 

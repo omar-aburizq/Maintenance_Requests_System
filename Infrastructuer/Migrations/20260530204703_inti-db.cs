@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Infrastructuer.Migrations
 {
     /// <inheritdoc />
@@ -47,6 +49,7 @@ namespace Infrastructuer.Migrations
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Location = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -69,7 +72,7 @@ namespace Infrastructuer.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    EmploeeyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EmployeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TechnicianId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -83,8 +86,8 @@ namespace Infrastructuer.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Requests_Users_EmploeeyId",
-                        column: x => x.EmploeeyId,
+                        name: "FK_Requests_Users_EmployeeId",
+                        column: x => x.EmployeeId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -148,8 +151,8 @@ namespace Infrastructuer.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Location = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EmployeeNotes = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TechnicianNotes = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhotoURL = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TechnicianNotes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhotoUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RequestId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -192,6 +195,18 @@ namespace Infrastructuer.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Categories",
+                columns: new[] { "Id", "Description", "Name" },
+                values: new object[,]
+                {
+                    { new Guid("7c20c266-0969-431b-b0a3-bb1a65d4baa5"), "Problems related to internet connectivity, network devices, Wi-Fi issues, and communication systems.", "Networking" },
+                    { new Guid("af51617f-64c4-409f-8867-749ca8a5ef83"), "Problems related to water systems including leaks, pipe blockages, drainage issues, and maintenance of plumbing fixtures.", "Plumbing" },
+                    { new Guid("d8ed6dd0-83c5-4d78-93e9-58a138b8ccd8"), "Issues related to heating, ventilation, and air conditioning systems including cooling/heating failures and maintenance.", "HVAC" },
+                    { new Guid("e8097122-bd95-4b96-bbe7-292241e044b8"), "All issues related to electrical systems, including power outages, wiring faults, lighting problems, and electrical equipment failures.", "Electrical" },
+                    { new Guid("f21254f2-7cc3-4cea-886e-bcded6cf9492"), "Issues related to computers, software, systems, and technical support such as system errors, software installation, and device troubleshooting.", "InformationTechnology" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_RequestDetails_RequestId",
                 table: "RequestDetails",
@@ -214,9 +229,9 @@ namespace Infrastructuer.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Requests_EmploeeyId",
+                name: "IX_Requests_EmployeeId",
                 table: "Requests",
-                column: "EmploeeyId");
+                column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Requests_TechnicianId",
@@ -229,9 +244,10 @@ namespace Infrastructuer.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TechnicianCategories_TechnicianId",
+                name: "IX_TechnicianCategories_TechnicianId_CategoryId",
                 table: "TechnicianCategories",
-                column: "TechnicianId");
+                columns: new[] { "TechnicianId", "CategoryId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tokens_UserId",

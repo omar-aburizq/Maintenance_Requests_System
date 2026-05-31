@@ -5,7 +5,7 @@ namespace Infrastructuer.Context
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions options) : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
 
         }
@@ -21,11 +21,11 @@ namespace Infrastructuer.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-        
+
             modelBuilder.Entity<Request>()
-                .HasOne(r => r.Emploeey)
+                .HasOne(r => r.Employee)
                 .WithMany(u => u.CreatedRequests)
-                .HasForeignKey(r => r.EmploeeyId)
+                .HasForeignKey(r => r.EmployeeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Request>()
@@ -34,15 +34,26 @@ namespace Infrastructuer.Context
                 .HasForeignKey(r => r.TechnicianId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<RequestDetail>()
+                .HasOne(rd => rd.Request)
+                .WithOne()
+                .HasForeignKey<RequestDetail>(rd => rd.RequestId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TechnicianCategory>()
+                .HasIndex(x => new { x.TechnicianId, x.CategoryId })
+                .IsUnique();
+
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly); // SeedData Confguration (CategoryConfiguration)
+            
             var relationShips = modelBuilder.Model
                 .GetEntityTypes().SelectMany(e => e.GetForeignKeys());
+            
 
             foreach (var relationship in relationShips)
             {
                 relationship.DeleteBehavior = DeleteBehavior.Restrict;
             }
-
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly); // SeedData Confguration (CategoryConfiguration)
 
             base.OnModelCreating(modelBuilder);
         }

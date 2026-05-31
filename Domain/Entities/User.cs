@@ -12,10 +12,10 @@
 
         public Guid RoleId { get; set; }
         public Role Role { get; set; }
-        public ICollection<Request> CreatedRequests { get; set; }
-        public ICollection<Request> AssignedRequests { get; set; }
+        public ICollection<Request> CreatedRequests { get; set; } 
+        public ICollection<Request> AssignedRequests { get; set; } 
         public ICollection<RequestHistory> RequestHistories { get; set; }
-        public ICollection<TechnicianCategory> TechnicianCategoryies { get; set; }
+        public ICollection<TechnicianCategory> TechnicianCategories { get; set; }
         public ICollection<Token> Tokens { get; set; }
     }
 }

@@ -21,7 +21,7 @@ namespace Application.Services.RequestService.DTOs
         public string Location { get; set; }
         public string EmployeeNotes { get; set; }
         public string TechnicianNotes { get; set; }
-        public string? PhotoURL { get; set; }
+        public string? PhotoUrl { get; set; }
 
     }
 }

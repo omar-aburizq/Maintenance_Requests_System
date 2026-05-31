@@ -30,12 +30,12 @@ namespace Application.Services.CategoryService
 
         public async Task DeleteCategory(Guid id)
         {
-            var category = await _categoryRepository.GetAll().Include(x => x.TechnicianCategoryies).Include(x => x.Requests).FirstOrDefaultAsync(x => x.Id == id);
+            var category = await _categoryRepository.GetAll().Include(x => x.TechnicianCategories).Include(x => x.Requests).FirstOrDefaultAsync(x => x.Id == id);
 
             if (category == null)
                 throw new Exception("category not found");
 
-            if (category.TechnicianCategoryies.Any())
+            if (category.TechnicianCategories.Any())
                 throw new Exception("there are technicians under this category");
 
             if (category.Requests.Any())

@@ -88,7 +88,7 @@ namespace Infrastructuer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("EmploeeyId")
+                    b.Property<Guid>("EmployeeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Status")
@@ -105,7 +105,7 @@ namespace Infrastructuer.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("EmploeeyId");
+                    b.HasIndex("EmployeeId");
 
                     b.HasIndex("TechnicianId");
 
@@ -126,7 +126,7 @@ namespace Infrastructuer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhotoURL")
+                    b.Property<string>("PhotoUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("RequestId")
@@ -210,7 +210,8 @@ namespace Infrastructuer.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("TechnicianId");
+                    b.HasIndex("TechnicianId", "CategoryId")
+                        .IsUnique();
 
                     b.ToTable("TechnicianCategories");
                 });
@@ -284,9 +285,9 @@ namespace Infrastructuer.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User", "Emploeey")
+                    b.HasOne("Domain.Entities.User", "Employee")
                         .WithMany("CreatedRequests")
-                        .HasForeignKey("EmploeeyId")
+                        .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -297,7 +298,7 @@ namespace Infrastructuer.Migrations
 
                     b.Navigation("Category");
 
-                    b.Navigation("Emploeey");
+                    b.Navigation("Employee");
 
                     b.Navigation("Technician");
                 });
@@ -305,8 +306,8 @@ namespace Infrastructuer.Migrations
             modelBuilder.Entity("Domain.Entities.RequestDetail", b =>
                 {
                     b.HasOne("Domain.Entities.Request", "Request")
-                        .WithMany()
-                        .HasForeignKey("RequestId")
+                        .WithOne()
+                        .HasForeignKey("Domain.Entities.RequestDetail", "RequestId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -335,13 +336,13 @@ namespace Infrastructuer.Migrations
             modelBuilder.Entity("Domain.Entities.TechnicianCategory", b =>
                 {
                     b.HasOne("Domain.Entities.Category", "Category")
-                        .WithMany("TechnicianCategoryies")
+                        .WithMany("TechnicianCategories")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.User", "Technician")
-                        .WithMany("TechnicianCategoryies")
+                        .WithMany("TechnicianCategories")
                         .HasForeignKey("TechnicianId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -377,7 +378,7 @@ namespace Infrastructuer.Migrations
                 {
                     b.Navigation("Requests");
 
-                    b.Navigation("TechnicianCategoryies");
+                    b.Navigation("TechnicianCategories");
                 });
 
             modelBuilder.Entity("Domain.Entities.Request", b =>
@@ -398,7 +399,7 @@ namespace Infrastructuer.Migrations
 
                     b.Navigation("RequestHistories");
 
-                    b.Navigation("TechnicianCategoryies");
+                    b.Navigation("TechnicianCategories");
 
                     b.Navigation("Tokens");
                 });

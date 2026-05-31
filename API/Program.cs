@@ -16,14 +16,16 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 
+// DbContext Registration
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
+// JWT Registration
 var jwtSection = builder.Configuration.GetSection("Jwt");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)  // Install Microsoft.AspNetCore.Authentication.JwtBearer
     .AddJwtBearer(options =>
@@ -45,7 +47,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)  // I
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 
-
+// Swagger Registration
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
@@ -86,6 +88,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Dependency Injection Registration
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped(typeof(IUserService), typeof(UserService));
 builder.Services.AddScoped(typeof(IRoleService), typeof(RoleService));
@@ -99,21 +102,22 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
-UserSeedData.UserSeed(app.Services);
+UserSeedData.UserSeed(app.Services); // Seed Data
 
-app.UseCors("AllowAll"); // CORS pipeline
+app.UseCors("AllowAll"); // CORS 
 
-app.UseSwagger();
+app.UseSwagger();  // Swagger
 
-app.UseSwaggerUI();
+app.UseSwaggerUI();  // Swagger
 
 app.UseHttpsRedirection();
 
 app.UseStaticFiles(); // setup static file for internal
 
-app.UseAuthentication();
+app.UseAuthentication();  // Authentication
 
-app.UseAuthorization();
+app.UseAuthorization();  // Authorization
+
 
 var uploadPath = builder.Configuration["FileStorage:UploadPath"]; // setup static file for external storage 
 

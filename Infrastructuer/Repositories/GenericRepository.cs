@@ -13,10 +13,12 @@ namespace Infrastructuer.Repositories
             _context = context;
             _dbSet = context.Set<T>();
         }
+
         public void Delete(T input)
         {
             _dbSet.Remove(input);
         }
+
 
         public IQueryable<T> GetAll()
         {
@@ -35,7 +37,7 @@ namespace Infrastructuer.Repositories
             await _dbSet.AddAsync(input);
         }
 
-        public async Task InsertRange(List<T> input)
+        public async Task InsertRangeAsync(List<T> input)
         {
             await _dbSet.AddRangeAsync(input);
         }
