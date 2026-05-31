@@ -53,24 +53,26 @@ namespace Application.Services.RequestService
             await _requestRepository.InsertAsync(data);
             await _requestRepository.SaveChangesAsync();
 
+            // upload attachment
 
             string? phtoUrl = null;
 
-            if (input.CreateRequestDitails.Phot != null)
-                phtoUrl = await UploadImage(input.CreateRequestDitails.Phot);
+            if (input.RequestDitails.Phot != null)
+                phtoUrl = await UploadImage(input.RequestDitails.Phot);
 
             var detail = new RequestDetail()
             {
                 Id = Guid.NewGuid(),
                 RequestId = data.Id,
-                Location = input.CreateRequestDitails.Location,
-                EmployeeNotes = input.CreateRequestDitails.EmployeeNotes,
+                Location = input.RequestDitails.Location,
+                EmployeeNotes = input.RequestDitails.EmployeeNotes,
                 PhotoUrl = phtoUrl
             };
             await _requestDetailRepository.InsertAsync(detail);
             await _requestDetailRepository.SaveChangesAsync();
         }
 
+        // UploadImage Function
         private async Task<string> UploadImage(IFormFile imag)
         {
             var baseUploadPath = _configuration["FileStorage:UploadPath"];
