@@ -1,4 +1,5 @@
 ﻿using Domain.Enums;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Services.RequestService.DTOs
 {
@@ -14,7 +15,7 @@ namespace Application.Services.RequestService.DTOs
     {
         public string Location { get; set; }
         public string EmployeeNotes { get; set; }
-        public string? PhotoUrl { get; set; }
+        public IFormFile? Photo { get; set; }
 
     }
 }

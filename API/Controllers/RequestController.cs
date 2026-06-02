@@ -29,16 +29,16 @@ namespace API.Controllers
         [HttpGet("GetAllRequests")]
         public async Task<IActionResult> GetAllRequests()
         {
-            var Request = await _requestService.GetAllRequest();
-            return Ok(Request);
+            var request = await _requestService.GetAllRequest();
+            return Ok(request);
         }
 
         [Authorize(Roles = $"{nameof(SystemRole.Admin)},{nameof(SystemRole.Employee)},{nameof(SystemRole.Technician)}")]
         [HttpGet("GetRequestById")]
         public async Task<IActionResult> GetRequestById(Guid id)
         {
-            var Request = await _requestService.GetRequestById(id);
-            return Ok(Request);
+            var request = await _requestService.GetRequestById(id);
+            return Ok(request);
         }
 
         [Authorize(Roles = $"{nameof(SystemRole.Admin)},{nameof(SystemRole.Employee)}")]
@@ -49,13 +49,6 @@ namespace API.Controllers
             return Ok();
         }
 
-        [Authorize(Roles = nameof(SystemRole.Admin))]
-        [HttpDelete("DeleteRequest")]
-        public async Task<IActionResult> DeleteRequest(Guid id)
-        {
-            await _requestService.DeleteRequest(id);
-            return Ok();
-        }
 
         [Authorize(Roles = nameof(SystemRole.Admin))]
         [HttpPut("AssignTechnician")]
@@ -65,7 +58,7 @@ namespace API.Controllers
             return Ok();
         }
 
-        [Authorize(Roles = $"{nameof(SystemRole.Admin)},{nameof(SystemRole.Technician)}")]
+        [Authorize]
         [HttpPut("ChangeStatus")]
         public async Task<IActionResult> ChangeStatus(Guid requestId, [FromBody] ChangeRequestStatusDto input)
         {

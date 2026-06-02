@@ -1,6 +1,5 @@
 ﻿using Application.Services.AuthService;
 using Application.Services.AuthService.DTOs;
-using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

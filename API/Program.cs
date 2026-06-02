@@ -123,7 +123,7 @@ app.UseAuthorization();  // Authorization
 app.UseStaticFiles();  // setup static files for internal wwwroot
 
 // setup static file for external storage 
-var uploadPath = builder.Configuration["FileStorage:UploadPath"]; 
+var uploadPath = builder.Configuration["FileStorage:UploadPath"];
 
 if (!string.IsNullOrEmpty(uploadPath))
 {

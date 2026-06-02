@@ -11,6 +11,6 @@ namespace Application.Services.RequestService.DTOs
         public RequestStatus Status { get; set; } 
         public string CategoryName { get; set; }
         public string EmployeeName { get; set; }
-        public string TechnicianName { get; set; }
+        public string? TechnicianName { get; set; }
     }
 }

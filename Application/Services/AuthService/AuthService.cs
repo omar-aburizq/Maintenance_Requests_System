@@ -30,7 +30,8 @@ namespace Application.Services.AuthService
 
         public async Task<LoginResponseDto> Login(LoginRequestDto input)
         {
-            var user = await _userRepository.GetAll().Include(x => x.Role).FirstOrDefaultAsync(x => (x.Email.ToLower().Trim() == input.Username.ToLower().Trim() || x.PhoneNumber.Trim() == input.Username.Trim()) && x.IsActive == true);
+
+            var user = await _userRepository.GetAll().Include(x => x.Role).FirstOrDefaultAsync(x => (x.Email.ToLower().Trim() == input.Username.ToLower().Trim() || x.PhoneNumber.Trim() == input.Username.Trim()) && (x.IsActive == true));
 
             if (user == null)
                 throw new Exception("userName or password invalid");

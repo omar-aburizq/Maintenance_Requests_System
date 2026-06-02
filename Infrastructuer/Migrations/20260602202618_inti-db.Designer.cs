@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructuer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260530204703_inti-db")]
+    [Migration("20260602202618_inti-db")]
     partial class intidb
     {
         /// <inheritdoc />

@@ -34,7 +34,6 @@ namespace Application.Services.RequestService
 
         public async Task CreateRequest(CreateRequestDto input)
         {
-
             if (!(await _categoryRepository.GetAll().AnyAsync(x => x.Id == input.CategoryId)))
                 throw new Exception("Category doesn't exist");
 
@@ -55,25 +54,33 @@ namespace Application.Services.RequestService
 
             // upload attachment
 
-            string? phtoUrl = null;
+            string? photoUrl = null;
 
-            if (input.RequestDitails.Phot != null)
-                phtoUrl = await UploadImage(input.RequestDitails.Phot);
+            if (input.RequestDetails.Photo != null)
+                photoUrl = await UploadImage(input.RequestDetails.Photo);
 
             var detail = new RequestDetail()
             {
                 Id = Guid.NewGuid(),
                 RequestId = data.Id,
-                Location = input.RequestDitails.Location,
-                EmployeeNotes = input.RequestDitails.EmployeeNotes,
-                PhotoUrl = phtoUrl
+                Location = input.RequestDetails.Location,
+                EmployeeNotes = input.RequestDetails.EmployeeNotes,
+                PhotoUrl = photoUrl
             };
             await _requestDetailRepository.InsertAsync(detail);
-            await _requestDetailRepository.SaveChangesAsync();
+
+            await AddRequestHistory(
+                data.Id,
+                null,
+                RequestStatus.New,
+                "Request created"
+            );
+
+            await _requestRepository.SaveChangesAsync();
         }
 
         // UploadImage Function
-        private async Task<string> UploadImage(IFormFile imag)
+        private async Task<string> UploadImage(IFormFile image)
         {
             var baseUploadPath = _configuration["FileStorage:UploadPath"];
             var UploadsFolder = Path.Combine(baseUploadPath, "Requests");
@@ -81,11 +88,11 @@ namespace Application.Services.RequestService
             if (!Directory.Exists(UploadsFolder))
                 Directory.CreateDirectory(UploadsFolder);
 
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imag.FileName);
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
             var filePath = Path.Combine(UploadsFolder, fileName);
 
             using (var fileStream = new FileStream(filePath, FileMode.Create))
-                await imag.CopyToAsync(fileStream);
+                await image.CopyToAsync(fileStream);
 
             var request = _httpContextAccessor.HttpContext.Request;
             var baseUrl = $"{request.Scheme}://{request.Host}";
@@ -94,20 +101,25 @@ namespace Application.Services.RequestService
         }
 
 
-        public async Task DeleteRequest(Guid id)
+        private async Task AddRequestHistory(Guid requestId, RequestStatus? oldStatus, RequestStatus newStatus, string? comment = null)
         {
-            var data = await _requestRepository.GetByIdAsync(id);
+            var userId = _currentUserService.UserId;
 
-            if (data == null)
-                throw new Exception("Request not found");
+            if (userId == null)
+                throw new Exception("User not authenticated");
 
-            var detail = await _requestDetailRepository.GetAll().FirstOrDefaultAsync(x => x.RequestId == id);
+            var history = new RequestHistory
+            {
+                Id = Guid.NewGuid(),
+                RequestId = requestId,
+                OldStatus = oldStatus,
+                NewStatus = newStatus,
+                Comment = comment,
+                UserId = userId.Value,
+                CreatedAt = DateTime.UtcNow
+            };
 
-            if (detail != null)
-                _requestDetailRepository.Delete(detail);
-
-            _requestRepository.Delete(data);
-            await _requestRepository.SaveChangesAsync();
+            await _requestHistoryRepository.InsertAsync(history);
         }
 
         public async Task<List<GetAllRequestDto>> GetAllRequest()
@@ -135,11 +147,11 @@ namespace Application.Services.RequestService
 
             var detail = await _requestDetailRepository.GetAll().FirstOrDefaultAsync(x => x.RequestId == id);
 
+            if (request == null)
+                throw new Exception("Request does not exist");
+
             if (detail == null)
                 throw new Exception("Request Detail not found");
-
-            if (request == null)
-                throw new Exception("request dosnt Exist");
 
             var data = new GetRequestByIdDto
             {
@@ -165,7 +177,7 @@ namespace Application.Services.RequestService
         public async Task UpdateRequest(Guid id, UpdateRequestDto input)
         {
             if (!(await _categoryRepository.GetAll().AnyAsync(x => x.Id == input.CategoryId)))
-                throw new Exception("Category dosent Exist");
+                throw new Exception("Category does not exist");
 
             var request = await _requestRepository.GetByIdAsync(id);
 
@@ -184,7 +196,6 @@ namespace Application.Services.RequestService
             request.Description = input.Description;
             request.CategoryId = input.CategoryId;
 
-            detail.PhotoUrl = input.UpdateRequestDetails.PhotoUrl;
             detail.Location = input.UpdateRequestDetails.Location;
             detail.EmployeeNotes = input.UpdateRequestDetails.EmployeeNotes;
 
@@ -202,19 +213,29 @@ namespace Application.Services.RequestService
             if (request == null)
                 throw new Exception("Request not found");
 
-            if (request.Status == RequestStatus.Cancelled)
-                throw new Exception("Cannot assign technician to cancelled request");
+            if (request.Status != RequestStatus.New)
+                throw new Exception("Technician can be assigned only to new requests");
 
-            if (request.Status == RequestStatus.Resolved)
-                throw new Exception("Cannot assign technician to resolved request");
-
-            var technician = await _userRepository.GetByIdAsync(technicianId);
+            var technician = await _userRepository.GetAll().Include(x => x.Role).FirstOrDefaultAsync(x => x.Id == technicianId);
 
             if (technician == null)
                 throw new Exception("Technician not found");
 
+            if (technician.Role.Code != SystemRole.Technician)
+                throw new Exception("Selected user is not a technician");
+
+            var oldStatus = request.Status;
+
             request.TechnicianId = technicianId;
             request.Status = RequestStatus.InProgress;
+
+
+            await AddRequestHistory(
+                request.Id,
+                oldStatus,
+                RequestStatus.InProgress,
+                "Technician assigned"
+            );
 
             _requestRepository.Update(request);
             await _requestRepository.SaveChangesAsync();
@@ -233,7 +254,25 @@ namespace Application.Services.RequestService
             if (request.TechnicianId == null)
                 throw new Exception("Request must be assigned to technician first");
 
+            if (status != RequestStatus.Resolved && status != RequestStatus.Done)
+                throw new Exception("Invalid status change");
+
+            var oldStatus = request.Status;
+
+            if (status == RequestStatus.Resolved && oldStatus != RequestStatus.InProgress)
+                throw new Exception("Only in progress requests can be resolved");
+
+            if (status == RequestStatus.Done && oldStatus != RequestStatus.Resolved)
+                throw new Exception("Only resolved requests can be closed");
+
             request.Status = status;
+
+            await AddRequestHistory(
+                request.Id,
+                oldStatus,
+                status,
+                $"Status changed from {oldStatus} to {status}"
+            );
 
             _requestRepository.Update(request);
             await _requestRepository.SaveChangesAsync();
@@ -249,7 +288,15 @@ namespace Application.Services.RequestService
             if (request.Status != RequestStatus.New)
                 throw new Exception("Only new requests can be cancelled");
 
+            var oldStatus = request.Status;
             request.Status = RequestStatus.Cancelled;
+
+            await AddRequestHistory(
+                request.Id,
+                oldStatus,
+                RequestStatus.Cancelled,
+                "Request cancelled"
+            );
 
             _requestRepository.Update(request);
             await _requestRepository.SaveChangesAsync();
