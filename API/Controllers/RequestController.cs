@@ -17,7 +17,7 @@ namespace API.Controllers
             _requestService = requestService;
         }
 
-        [Authorize(Roles = nameof(SystemRole.Employee))]
+        [Authorize(Roles = $"{nameof(SystemRole.Admin)},{nameof(SystemRole.Employee)}")]
         [HttpPost("CreateRequest")]
         public async Task<IActionResult> CreateRequest([FromForm] CreateRequestDto input)
         {
@@ -58,7 +58,7 @@ namespace API.Controllers
             return Ok();
         }
 
-        [Authorize]
+        [Authorize(Roles = $"{nameof(SystemRole.Admin)},{nameof(SystemRole.Technician)}")]
         [HttpPut("ChangeStatus")]
         public async Task<IActionResult> ChangeStatus(Guid requestId, [FromBody] ChangeRequestStatusDto input)
         {
@@ -66,7 +66,7 @@ namespace API.Controllers
             return Ok();
         }
 
-        [Authorize(Roles = nameof(SystemRole.Employee))]
+        [Authorize(Roles = $"{nameof(SystemRole.Admin)},{nameof(SystemRole.Employee)}")]
         [HttpPut("CancelRequest")]
         public async Task<IActionResult> CancelRequest(Guid requestId)
         {

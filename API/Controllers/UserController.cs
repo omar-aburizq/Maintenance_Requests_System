@@ -18,7 +18,7 @@ namespace API.Controllers
             _userService = userService;
         }
 
-        [AllowAnonymous]
+        [Authorize(Roles = nameof(SystemRole.Admin))]
         [HttpPost("CreateUser")]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserDto input)
         {
@@ -26,7 +26,7 @@ namespace API.Controllers
             return Ok();
         }
 
-        [Authorize(Roles = $"{nameof(SystemRole.Admin)},{nameof(SystemRole.Employee)}")]
+        [Authorize(Roles = nameof(SystemRole.Admin))]
         [HttpPut("UpdateUser")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto input)
         {

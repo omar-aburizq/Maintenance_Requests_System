@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Authorize(Roles = nameof(SystemRole.Admin))]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CategoryController : ControllerBase
@@ -17,6 +17,7 @@ namespace API.Controllers
             _categoryService = categoryService;
         }
 
+        [Authorize(Roles = nameof(SystemRole.Admin))]
         [HttpPost("CreateCategory")]
         public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryDto input)
         {
@@ -24,6 +25,7 @@ namespace API.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = nameof(SystemRole.Admin))]
         [HttpPut("UpdateCategory")]
         public async Task<IActionResult> UpdateCategory(Guid id , [FromBody] UpdateCategoryDto input)
         {
@@ -31,6 +33,7 @@ namespace API.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = $"{nameof(SystemRole.Admin)},{nameof(SystemRole.Employee)},{nameof(SystemRole.Technician)}")]
         [HttpGet("GetAllCategories")]
         public async Task<IActionResult> GetAllCategories()
         {
@@ -38,6 +41,7 @@ namespace API.Controllers
             return Ok(categories);
         }
 
+        [Authorize(Roles = $"{nameof(SystemRole.Admin)},{nameof(SystemRole.Employee)},{nameof(SystemRole.Technician)}")]
         [HttpGet("GetCategoryById")]
         public async Task<IActionResult> GetCategoryById(Guid id)
         {
@@ -45,6 +49,7 @@ namespace API.Controllers
             return Ok(category);
         }
 
+        [Authorize(Roles = nameof(SystemRole.Admin))]
         [HttpDelete("DeleteCategory")]
         public async Task<IActionResult> DeleteCategory(Guid id)
         {
