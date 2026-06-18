@@ -58,7 +58,7 @@ namespace API.Controllers
             return Ok();
         }
 
-        [Authorize(Roles = $"{nameof(SystemRole.Admin)},{nameof(SystemRole.Technician)}")]
+        [Authorize(Roles = $"{nameof(SystemRole.Employee)},{nameof(SystemRole.Technician)}")]
         [HttpPut("ChangeStatus")]
         public async Task<IActionResult> ChangeStatus(Guid requestId, [FromBody] ChangeRequestStatusDto input)
         {

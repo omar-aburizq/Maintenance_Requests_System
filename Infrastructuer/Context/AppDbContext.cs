@@ -40,7 +40,7 @@ namespace Infrastructuer.Context
                 .HasForeignKey<RequestDetail>(rd => rd.RequestId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<TechnicianCategory>()
+            modelBuilder.Entity<TechnicianCategory>() // Prevents assigning the same category to the same technician more than once. 
                 .HasIndex(x => new { x.TechnicianId, x.CategoryId })
                 .IsUnique();
 
@@ -50,7 +50,7 @@ namespace Infrastructuer.Context
                 .GetEntityTypes().SelectMany(e => e.GetForeignKeys());
             
 
-            foreach (var relationship in relationShips)
+            foreach (var relationship in relationShips) // Set all foreign key relationships to Restrict to prevent cascade deletes.
             {
                 relationship.DeleteBehavior = DeleteBehavior.Restrict;
             }

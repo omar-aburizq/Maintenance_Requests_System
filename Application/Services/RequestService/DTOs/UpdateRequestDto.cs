@@ -15,7 +15,6 @@ namespace Application.Services.RequestService.DTOs
     {
         public string Location { get; set; }
         public string EmployeeNotes { get; set; }
-        public IFormFile? Photo { get; set; }
 
     }
 }

@@ -24,7 +24,6 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [Authorize]
         [HttpPost("ChangeUserPassword")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangeUserPasswordDto input)
         {
@@ -40,7 +39,6 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [Authorize]
         [HttpPost("Logout")]
         public async Task<IActionResult> Logout([FromBody] RefreshTokenDto input)
         {

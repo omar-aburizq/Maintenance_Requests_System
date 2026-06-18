@@ -37,9 +37,9 @@ namespace Infrastructuer.Data
                 {
                     Name = "Admin User",
                     Email = "admin@gmail.com",
-                    PhoneNumber = "00692712345678",
+                    PhoneNumber = "0712345678",
                     RoleId = adminRoleId,
-                    Location = "Office"
+                    Location = "Office A"
                 };
 
                 var passwordHaser = new PasswordHasher<User>();  // Install Microsoft.Extensions.Identity.Core

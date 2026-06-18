@@ -207,12 +207,10 @@ namespace Application.Services.UserService
             if (user == null)
                 throw new Exception("User not found");
 
-            if (await _userRepository.GetAll()
-                .AnyAsync(x => x.Email.ToLower().Trim() == input.Email.ToLower().Trim() && x.Id != id))
+            if (await _userRepository.GetAll().AnyAsync(x => x.Email.ToLower().Trim() == input.Email.ToLower().Trim() && x.Id != id))
                 throw new Exception("Email Already Exist");
 
-            if (await _userRepository.GetAll()
-                .AnyAsync(x => x.PhoneNumber.Trim() == input.PhoneNumber.Trim() && x.Id != id))
+            if (await _userRepository.GetAll().AnyAsync(x => x.PhoneNumber.Trim() == input.PhoneNumber.Trim() && x.Id != id))
                 throw new Exception("PhoneNumber Already Exist");
 
             var role = await _roleRepository.GetByIdAsync(input.RoleId);

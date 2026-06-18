@@ -4,10 +4,10 @@ namespace Application.Services.CategoryService
 {
     public interface ICategoryService
     {
-        public Task CreateCategory(CreateCategoryDto input);
-        public Task<List<GetAllCategoriesDto>> GetAllCategories();
-        public Task<GetCategoryByIdDto> GetCategoryById(Guid id);
-        public Task UpdateCategory(Guid id , UpdateCategoryDto input);
-        public Task DeleteCategory (Guid id);
+        Task CreateCategory(CreateCategoryDto input);
+        Task<List<GetAllCategoriesDto>> GetAllCategories();
+        Task<GetCategoryByIdDto> GetCategoryById(Guid id);
+        Task UpdateCategory(Guid id, UpdateCategoryDto input);
+        Task DeleteCategory(Guid id);
     }
 }
