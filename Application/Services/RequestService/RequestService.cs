@@ -259,11 +259,23 @@ namespace Application.Services.RequestService
 
             var oldStatus = request.Status;
 
-            if (status == RequestStatus.Resolved && oldStatus != RequestStatus.InProgress)
-                throw new Exception("Only in progress requests can be resolved");
+            if (status == RequestStatus.Resolved)
+            {
+                if (_currentUserService.Role != SystemRole.Technician.ToString())
+                    throw new Exception("Only technician can resolve the request");
 
-            if (status == RequestStatus.Done && oldStatus != RequestStatus.Resolved)
-                throw new Exception("Only resolved requests can be closed");
+                if (oldStatus != RequestStatus.InProgress)
+                    throw new Exception("Only in progress requests can be resolved");
+            }
+
+            if (status == RequestStatus.Done)
+            {
+                if (_currentUserService.Role != SystemRole.Employee.ToString())
+                    throw new Exception("Only employee can close the request");
+
+                if (oldStatus != RequestStatus.Resolved)
+                    throw new Exception("Only resolved requests can be closed");
+            }
 
             request.Status = status;
 
